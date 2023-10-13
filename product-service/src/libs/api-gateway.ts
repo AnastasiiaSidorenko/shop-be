@@ -1,7 +1,7 @@
-import { IProduct } from "src/models/IProduct"
+import { ResponseType } from "src/models/ResponseType";
+import { StatusCode } from "src/models/StatusCode";
 
-export const formatJSONResponse = (statusCode, response: IProduct[]) => {
-  console.log(response);
+export const formatJSONResponse = (statusCode: StatusCode, response: ResponseType) => {
   return {
     statusCode,
     headers: {
@@ -9,4 +9,4 @@ export const formatJSONResponse = (statusCode, response: IProduct[]) => {
     },
     body: JSON.stringify(response)
   }
-}
+};

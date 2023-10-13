@@ -3,7 +3,7 @@ import { IProduct } from "src/models/IProduct";
 
 export const productMocks: IProduct[] = [
     {
-        id: uuidv4(),
+        id: "1",
         description: 'Description1',
         price: 1000,
         title: 'Pandora',
