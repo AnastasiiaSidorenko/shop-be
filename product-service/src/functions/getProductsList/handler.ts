@@ -13,7 +13,7 @@ export const getProductsList = async () => {
     }
 
     return formatJSONResponse(StatusCode.NOT_FOUND, {
-      message: `Products are not found`,
+      message: `Products not found`,
     });
 
   } catch (error) {
