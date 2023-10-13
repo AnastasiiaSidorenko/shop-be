@@ -1,0 +1,90 @@
+openapi: 3.0.0
+info:
+  title: Product Service
+  version: 1.0.0
+servers:
+  - url: https://kez8es0wi7.execute-api.eu-west-1.amazonaws.com/dev
+    description: Development server
+paths:
+  /products:
+    get:
+      tags:
+        - Products
+      summary: Returns a list of products.
+      operationId: getProductsList
+      responses:
+        '200':
+          description: A JSON array of products
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Products'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /products/{productId}:
+    get:
+      summary: Get the product by ID
+      tags:
+        - Products
+      operationId: getProductById
+      parameters:
+        - name: productId
+          in: path
+          description: ID of the product
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+components:
+  responses:
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'    
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  schemas:
+    Product:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique ID of the product
+        title:
+          type: string
+          description: Name of the product
+        price:
+          type: number
+          format: float
+          description: Price of the product
+        description:
+          type: string
+          description: Description of the product
+    Products:
+      type: array
+      items:
+        $ref: '#/components/schemas/Product'
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Error message  
