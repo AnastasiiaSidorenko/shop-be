@@ -24,7 +24,7 @@ describe("getProductById", () => {
         Promise.resolve(productMocks.find((product) => product.id === id))
       );
 
-    const eventMock = { pathParameters: { productId: "non-existent ID" } };
+    const eventMock = { pathParameters: { productId: "invalid-id" } };
     const result = await getProductById(eventMock);
 
     expect(result.statusCode).toBe(404);
@@ -34,9 +34,9 @@ describe("getProductById", () => {
   });
 
   it("should return 500 if the request for the product was failed", async () => {
-    jest.spyOn(ProductService, "getProductById").mockImplementation(() => {
-      throw new Error();
-    });
+    jest.spyOn(ProductService, "getProductById").mockRejectedValue(
+      new Error()
+    );
 
     const eventMock = { pathParameters: { productId: "1" } };
     const result = await getProductById(eventMock);

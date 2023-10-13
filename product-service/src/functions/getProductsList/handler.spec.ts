@@ -7,7 +7,7 @@ describe("getProductList", () => {
     it("should return products' list", async () => {
         jest
             .spyOn(ProductService, "getProductsList")
-            .mockImplementation(() => Promise.resolve(productMocks));
+            .mockResolvedValue(productMocks);
 
         const result = await getProductsList();
 
@@ -18,7 +18,7 @@ describe("getProductList", () => {
     it("should return 404 if products' list is empty", async () => {
         jest
             .spyOn(ProductService, "getProductsList")
-            .mockImplementation(() => Promise.resolve([]));
+            .mockResolvedValue([]);
 
         const result = await getProductsList();
 
@@ -29,9 +29,9 @@ describe("getProductList", () => {
     });
 
     it("should return 500 if the request for products' list was failed", async () => {
-        jest.spyOn(ProductService, "getProductsList").mockImplementation(() => {
-            throw new Error();
-        });
+        jest.spyOn(ProductService, "getProductsList").mockRejectedValue(
+            new Error()
+        );
 
         const result = await getProductsList();
 
