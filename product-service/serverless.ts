@@ -17,7 +17,27 @@ const serverlessConfiguration: AWS = {
     environment: {
       AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
       NODE_OPTIONS: '--enable-source-maps --stack-trace-limit=1000',
+      PRODUCTS_TABLE_NAME: 'Products',
+      STOCKS_TABLE_NAME: 'Stocks'
     },
+    iamRoleStatements: [
+      {
+        Effect: "Allow",
+        Action: [
+          // "dynamodb:DescribeTable",
+          // "dynamodb:Query",
+          "dynamodb:Scan",
+          "dynamodb:GetItem",
+          "dynamodb:PutItem",
+          // "dynamodb:UpdateItem",
+          // "dynamodb:DeleteItem",
+        ],
+        Resource: [
+          "arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.PRODUCTS_TABLE_NAME}",
+          "arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.STOCKS_TABLE_NAME}",
+        ],
+      },
+    ],
   },
   // import the function via paths
   functions: { getProductsList, getProductById },
@@ -34,6 +54,34 @@ const serverlessConfiguration: AWS = {
       concurrency: 10,
     },
   },
+  resources: {
+    Resources: {
+      Products: {
+        Type: 'AWS::DynamoDB::Table',
+        Properties: {
+          TableName: '${self:provider.environment.PRODUCTS_TABLE_NAME}',
+          AttributeDefinitions: [{ AttributeName: 'id', AttributeType: 'S' }],
+          KeySchema: [{ AttributeName: 'id', KeyType: 'HASH' }],
+          ProvisionedThroughput: {
+            ReadCapacityUnits: 5,
+            WriteCapacityUnits: 5,
+          },
+        },
+      },
+      Stocks: {
+        Type: 'AWS::DynamoDB::Table',
+        Properties: {
+          TableName: '${self:provider.environment.STOCKS_TABLE_NAME}',
+          AttributeDefinitions: [{ AttributeName: 'product_id', AttributeType: 'S' }],
+          KeySchema: [{ AttributeName: 'product_id', KeyType: 'HASH' }],
+          ProvisionedThroughput: {
+            ReadCapacityUnits: 5,
+            WriteCapacityUnits: 5,
+          },
+        },
+      }
+    }
+  }
 };
 
 module.exports = serverlessConfiguration;
