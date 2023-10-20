@@ -5,6 +5,8 @@ import { StatusCode } from 'src/models/StatusCode';
 import { ProductService } from 'src/service/ProductService';
 
 export const getProductById = async (event) => {
+    console.log("'getProductById' lambda was called: ", event);
+
     const { productId } = event.pathParameters;
     try {
         const product: IProduct = await ProductService.getProductById(productId);

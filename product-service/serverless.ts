@@ -1,5 +1,5 @@
 import type { AWS } from '@serverless/typescript';
-import { getProductsList, getProductById } from '@functions/index';
+import { getProductsList, getProductById, createProduct } from '@functions/index';
 
 const serverlessConfiguration: AWS = {
   service: 'product-service',
@@ -24,13 +24,10 @@ const serverlessConfiguration: AWS = {
       {
         Effect: "Allow",
         Action: [
-          // "dynamodb:DescribeTable",
-          // "dynamodb:Query",
+          "dynamodb:DescribeTable",
           "dynamodb:Scan",
           "dynamodb:GetItem",
           "dynamodb:PutItem",
-          // "dynamodb:UpdateItem",
-          // "dynamodb:DeleteItem",
         ],
         Resource: [
           "arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.PRODUCTS_TABLE_NAME}",
@@ -40,7 +37,7 @@ const serverlessConfiguration: AWS = {
     ],
   },
   // import the function via paths
-  functions: { getProductsList, getProductById },
+  functions: { getProductsList, getProductById, createProduct },
   package: { individually: true },
   custom: {
     esbuild: {

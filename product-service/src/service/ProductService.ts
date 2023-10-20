@@ -1,4 +1,5 @@
-import { getItemByKey, getTableData } from "./utils";
+import { v4 as uuidv4 } from "uuid";
+import { createProduct, getItemByKey, getTableData } from "./utils";
 import { IProduct, IProductDB, IStockDB } from "src/models/IProduct";
 
 export const ProductService = {
@@ -18,6 +19,7 @@ export const ProductService = {
 
         return joinedProductInfo;
     },
+
     getProductById: async (id: string) => {
         const product = (await getItemByKey(
             process.env.PRODUCTS_TABLE_NAME,
@@ -41,5 +43,22 @@ export const ProductService = {
         };
 
         return joinedProduct;
+    },
+
+    createProduct: async (body) => {
+        const id: string = uuidv4();
+        const { title, price, count, description } = body;
+
+        const newProduct = await createProduct(
+            id,
+            title,
+            price,
+            count,
+            description,
+            process.env.PRODUCTS_TABLE_NAME,
+            process.env.STOCKS_TABLE_NAME
+        );
+
+        return newProduct;
     },
 };
