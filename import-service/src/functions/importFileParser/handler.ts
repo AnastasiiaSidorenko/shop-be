@@ -1,14 +1,20 @@
 import { formatJSONResponse } from '@libs/api-gateway';
-import { middyfy } from '@libs/lambda';
 import { StatusCode } from 'src/models/StatusCode';
 import { ImportService } from 'src/service/ImportService';
 
-const importFileParser = async (event) => {
+export const importFileParser = async (event) => {
   console.log("'importFileParser' lambda was called: ", event);
 
   try {
-    for (let record of event.Records) {
-      await ImportService.importFileParser(record);
+    const s3Records = event.Records;
+
+    for (const record of s3Records) {
+      const parsedData = await ImportService.importFileParser(record);
+
+      if (parsedData) {
+        console.log("File successfully parsed", parsedData);
+        await ImportService.moveFile(record);
+      }
     }
   } catch (error) {
     return formatJSONResponse(StatusCode.INTERNAL_SERVER_ERROR, {
@@ -16,5 +22,3 @@ const importFileParser = async (event) => {
     });
   }
 };
-
-export const main = middyfy(importFileParser);
