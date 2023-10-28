@@ -3,7 +3,7 @@ import { middyfy } from '@libs/lambda';
 import { StatusCode } from 'src/models/StatusCode';
 import { ImportService } from 'src/service/ImportService';
 
-const importProductsFile = async (event) => {
+export const importProductsFile = async (event) => {
   console.log("'importProductsFile' lambda was called: ", event);
 
   try {
