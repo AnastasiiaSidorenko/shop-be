@@ -4,7 +4,9 @@ import { IProduct } from 'src/models/IProduct';
 import { StatusCode } from 'src/models/StatusCode';
 import { ProductService } from 'src/service/ProductService';
 
-export const getProductsList = async () => {
+export const getProductsList = async (event) => {
+  console.log("'getProductsList' lambda was called: ", event);
+
   try {
     const products: IProduct[] = await ProductService.getProductsList();
 
