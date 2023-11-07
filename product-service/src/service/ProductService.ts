@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from "uuid";
-import { createProduct, getItemByKey, getTableData } from "./utils";
+import { SNSClient, PublishCommand } from "@aws-sdk/client-sns";
+import { createProduct, createProductsBatchProcess, getItemByKey, getTableData } from "./utils";
 import { IProduct, IProductDB, IStockDB } from "src/models/IProduct";
 
 export const ProductService = {
@@ -47,18 +48,43 @@ export const ProductService = {
 
     createProduct: async (body) => {
         const id: string = uuidv4();
-        const { title, price, count, description } = body;
 
-        const newProduct = await createProduct(
+        const newProduct = await createProduct({
             id,
-            title,
-            price,
-            count,
-            description,
-            process.env.PRODUCTS_TABLE_NAME,
-            process.env.STOCKS_TABLE_NAME
-        );
+            ...body
+        });
 
         return newProduct;
+    },
+
+    createProductsBatchProcess: async (products) => {
+        const id: string = uuidv4();
+
+        const productItems: IProduct[] = products.map((product) => ({
+            id,
+            ...product,
+        }));
+
+        await createProductsBatchProcess(productItems);
+    },
+
+    sendMessages: async (products) => {
+        const snsClient = new SNSClient({ region: "eu-west-1" });
+
+        for (const product of products) {
+            const sqsCommand = new PublishCommand({
+                Subject: `Product "${product.title}" was created`,
+                Message: JSON.stringify(product),
+                MessageAttributes: {
+                    productPrice: {
+                        DataType: "Number",
+                        StringValue: `${product.price}`,
+                    },
+                },
+                TopicArn: process.env.SNS_ARN,
+            });
+
+            await snsClient.send(sqsCommand);
+        }
     },
 };

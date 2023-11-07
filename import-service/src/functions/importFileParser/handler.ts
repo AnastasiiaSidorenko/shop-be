@@ -1,8 +1,9 @@
+import { S3Event } from 'aws-lambda';
 import { formatJSONResponse } from '@libs/api-gateway';
 import { StatusCode } from 'src/models/StatusCode';
 import { ImportService } from 'src/service/ImportService';
 
-export const importFileParser = async (event) => {
+export const importFileParser = async (event: S3Event) => {
   console.log("'importFileParser' lambda was called: ", event);
 
   try {

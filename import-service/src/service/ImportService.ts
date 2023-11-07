@@ -1,5 +1,6 @@
 import { S3 } from 'aws-sdk';
 import { S3EventRecord } from 'aws-lambda';
+import { SQSClient, SendMessageCommand } from "@aws-sdk/client-sqs";
 
 const csv = require('csv-parser');
 
@@ -19,6 +20,7 @@ export const ImportService = {
     },
     importFileParser: async (record: S3EventRecord) => {
         const s3 = new S3({ region: 'eu-west-1' });
+        const sqsClient = new SQSClient({ region: "eu-west-1" });
 
         const bucket = record.s3.bucket.name;
         const key = record.s3.object.key;
@@ -33,9 +35,16 @@ export const ImportService = {
         const results = [];
         const parsedData = await new Promise((resolve, reject) => {
             file.pipe(csv())
-                .on("data", (data) => {
-                    console.log("Record: ", data);
+                .on("data", async (data) => {
                     results.push(data);
+                    
+                    const sqsCommand = new SendMessageCommand({
+                        QueueUrl: process.env.QUEUE_URL,                        
+                        MessageBody: JSON.stringify(data),
+                    });
+
+
+                    await sqsClient.send(sqsCommand);
                 })
                 .on("end", () => {
                     resolve(results);
@@ -47,7 +56,7 @@ export const ImportService = {
 
         return parsedData;
     },
-    moveFile: async(record: S3EventRecord) => {
+    moveFile: async (record: S3EventRecord) => {
         const s3 = new S3({ region: 'eu-west-1' });
 
         const bucket = record.s3.bucket.name;
