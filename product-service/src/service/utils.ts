@@ -5,38 +5,36 @@ import { IProduct } from "src/models/IProduct";
 const dbClient = new DynamoDBClient({ region: 'eu-west-1' });
 
 const getTransactItems = (products: IProduct[]) => {
-const result = [];
-
-products.forEach((product) => {
-    const { id, title, price, count, description } = product;
-
-    result.push(
+    const result = [];
+  
+    for (const product of products) {
+      const { id, title, price, count, description } = product;
+      result.push(
         {
-            Put: {
-                Item: {
-                    id,
-                    title,
-                    description,
-                    price,
-                },
-                TableName: process.env.PRODUCTS_TABLE_NAME,
+          Put: {
+            Item: {
+              id,
+              title,
+              description,
+              price,
             },
+            TableName: process.env.PRODUCTS_TABLE_NAME,
+          },
         },
         {
-            Put: {
-                Item: {
-                    product_id: id,
-                    count,
-                },
-                TableName: process.env.STOCKS_TABLE_NAME,
+          Put: {
+            Item: {
+              product_id: id,
+              count,
             },
-        },
-    );
-});
-
-return result;
-
-};
+            TableName: process.env.STOCKS_TABLE_NAME,
+          },
+        }
+      );
+    }
+  
+    return result;
+  };
 
 export const getTableData = async (tableName: string) => {
     const command = new ScanCommand({
