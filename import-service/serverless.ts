@@ -20,6 +20,12 @@ const serverlessConfiguration: AWS = {
       BUCKET_NAME: "my-aws-course-import-products",
       UPLOADED_FILES_FOLDER: "uploaded",
       PARSED_FILES_FOLDER: "parsed",
+      QUEUE_URL: {
+        "Fn::ImportValue": "queueURL",
+      },
+      QUEUE_ARN: {
+        "Fn::ImportValue": "queueARN",
+      },
     },
     iamRoleStatements: [
       {
@@ -33,6 +39,11 @@ const serverlessConfiguration: AWS = {
         Action: "s3:*",
         Resource:
           "arn:aws:s3:::my-aws-course-import-products/*",
+      },
+      {
+        Effect: "Allow",
+        Action: ["sqs:*"],
+        Resource: "${self:provider.environment.QUEUE_ARN}",
       },
     ],
   },

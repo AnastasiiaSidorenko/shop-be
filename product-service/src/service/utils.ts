@@ -1,7 +1,40 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { ScanCommand, GetCommand, TransactWriteCommand } from "@aws-sdk/lib-dynamodb";
+import { IProduct } from "src/models/IProduct";
 
 const dbClient = new DynamoDBClient({ region: 'eu-west-1' });
+
+const getTransactItems = (products: IProduct[]) => {
+    const result = [];
+  
+    for (const product of products) {
+      const { id, title, price, count, description } = product;
+      result.push(
+        {
+          Put: {
+            Item: {
+              id,
+              title,
+              description,
+              price,
+            },
+            TableName: process.env.PRODUCTS_TABLE_NAME,
+          },
+        },
+        {
+          Put: {
+            Item: {
+              product_id: id,
+              count,
+            },
+            TableName: process.env.STOCKS_TABLE_NAME,
+          },
+        }
+      );
+    }
+  
+    return result;
+  };
 
 export const getTableData = async (tableName: string) => {
     const command = new ScanCommand({
@@ -25,41 +58,20 @@ export const getItemByKey = async (tableName: string, key: string, value: string
     return response;
 };
 
-export const createProduct = async (
-    id: string,
-    title: string,
-    price: number,
-    count: number,
-    description: string,
-    productsTableName: string,
-    stocksTableName: string
-) => {
+export const createProduct = async (data: IProduct) => {
     const command = new TransactWriteCommand({
-        TransactItems: [
-            {
-                Put: {
-                    Item: {
-                        id,
-                        title,
-                        description,
-                        price,
-                    },
-                    TableName: productsTableName,
-                },
-            },
-            {
-                Put: {
-                    Item: {
-                        product_id: id,
-                        count,
-                    },
-                    TableName: stocksTableName,
-                },
-            },
-        ],
+        TransactItems: getTransactItems([data]),
     });
 
     await dbClient.send(command);
 
-    return { id, title, price, count, description };
+    return data;
+};
+
+export const createProductsBatchProcess = async (data: IProduct[]) => {
+    const command = new TransactWriteCommand({
+        TransactItems: getTransactItems(data),
+    });
+    
+    await dbClient.send(command);
 };
